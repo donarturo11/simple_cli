@@ -30,6 +30,7 @@ void execCmd(const char* cmdstr, const char* params) {
         printf("No such command\n");
         return;
     }
+    if (n->cmd->name) printf("Executing %s\n", n->cmd->name);
     if (!n->cmd->data) n->cmd->data = (void*) params;
     printf("Foind command: %s", n->cmd->name);
     n->cmd->fn(n->cmd->data);
@@ -72,11 +73,14 @@ void appendCmd(const char* name, void (*function)(void *data), void *data) {
         COMMANDS.end = node;
     } else {
         node->prev = COMMANDS.end;
+        node->prev->next = node;
         node->next = NULL;
         COMMANDS.end = node;
     }
     
     printf("Added command %s\n", node->cmd->name);
+    printf("Begin %s\n", COMMANDS.begin->cmd->name);
+    printf("End %s\n", COMMANDS.end->cmd->name);
 }
 
 void removeCmd(const char* name) {
@@ -89,7 +93,7 @@ void removeCmd(const char* name) {
 command_node_t* findCmd(const char* name) {
     printf("Searching command %s\n", name);
     for (command_node_t *it = COMMANDS.begin;
-         it != COMMANDS.end;
+         it != NULL;
          it=it->next) {
         if (it && !strcmp(it->cmd->name, name)) {
             printf("FOUND\n");
@@ -98,6 +102,14 @@ command_node_t* findCmd(const char* name) {
     }
     printf("NOTHING FOUND\n");
     return NULL;
+}
+
+void listCmd() {
+    for (command_node_t *it = COMMANDS.begin;
+         it != NULL;
+         it = it->next) {
+             if (it) printf("==> %s\n", it->cmd->name);
+         }
 }
 
 void CLI_init() {
@@ -110,6 +122,10 @@ int CLI_loop() {
     printf("\n>");
     fgets(cmd, 64, stdin);
     if (!strcmp(cmd, "quit\n")) return 0;
+    if (!strcmp(cmd, "list\n")) {
+        listCmd();
+        return CLI_loop();    
+    }
     else {
         parseCmd(cmd);
         return CLI_loop();

@@ -28,7 +28,7 @@ void appendCmd(const char* name, void (*function)(void *data), void *data);
 void removeCmd(const char* name);
 command_node_t* findCmd(const char* name);
 void nullCmd(void* data);
-
+void listCmd();
 void CLI_init();
 int CLI_loop();
 
